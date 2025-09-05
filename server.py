@@ -40,23 +40,26 @@ def generate_video():
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             for line in lyrics_text.split("\n"):
                 line = line.strip()
-                # Split long lines gently with a small space
+                # Gentle split for long lines
                 if len(line) > 40:
                     mid = len(line) // 2
-                    f.write(line[:mid] + "\n" + line[mid:] + "\n\n")  # gentle split
+                    f.write(line[:mid] + "\n" + line[mid:] + "\n\n")  # small gap
                 else:
-                    f.write(line + "\n\n")  # small space below short lines
+                    f.write(line + "\n\n")  # small gap for short lines
 
         # Output temporary video
         fd, out_path = tempfile.mkstemp(suffix=".mp4")
         os.close(fd)
+
+        # Use absolute path for font
+        font_path = os.path.join(os.getcwd(), "RushFlow.ttf")
 
         # FFmpeg command
         cmd = [
             "ffmpeg", "-y",
             "-loop", "1", "-i", img_path,
             "-i", audio_path,
-            "-vf", f"subtitles='{srt_path}':force_style='FontName=Rush Flow,FontSize=36,PrimaryColour=&HFFFFFF&'",
+            "-vf", f"subtitles={srt_path}:force_style='FontName=RushFlow,FontSize=36,PrimaryColour=&HFFFFFF&,FontFile={font_path}'",
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-shortest",
@@ -64,6 +67,7 @@ def generate_video():
         ]
         subprocess.run(cmd, check=True)
 
+        # Send video file
         return send_file(out_path, mimetype="video/mp4", as_attachment=True, download_name="final_video.mp4")
 
     except requests.RequestException as e:
@@ -73,6 +77,7 @@ def generate_video():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
+        # Cleanup temporary files AFTER sending
         for p in [audio_path, img_path, srt_path, out_path]:
             if p and os.path.exists(p):
                 try:
