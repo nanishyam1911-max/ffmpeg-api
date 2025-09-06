@@ -1,4 +1,0 @@
-flask
-requests
-git+https://github.com/openai/whisper.git
-torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
