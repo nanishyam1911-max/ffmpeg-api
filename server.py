@@ -214,8 +214,8 @@ def create_srt_with_whisper(lyrics_text, whisper_segments=None, audio_duration=N
                 end_milliseconds = int((end_time % 1) * 1000)
                 
                 f.write(f"{lyrics_index + 1}\n")
-                f.write(f"{start_minutes:02d}:{start_seconds:02d}:{start_milliseconds:03d},000 --> ")
-                f.write(f"{end_minutes:02d}:{end_seconds:02d}:{end_milliseconds:03d},000\n")
+                f.write(f"{start_minutes:02d}:{start_seconds:02d}:{start_milliseconds:03d} --> ")
+                f.write(f"{end_minutes:02d}:{end_seconds:02d}:{end_milliseconds:03d}\n")
                 f.write(f"{processed_lines[lyrics_index]}\n\n")
                 
                 lyrics_index += 1
@@ -245,8 +245,8 @@ def create_srt_with_whisper(lyrics_text, whisper_segments=None, audio_duration=N
                 end_milliseconds = int((end_time % 1) * 1000)
                 
                 f.write(f"{idx + 1}\n")
-                f.write(f"{start_minutes:02d}:{start_seconds:02d}:{start_milliseconds:03d},000 --> ")
-                f.write(f"{end_minutes:02d}:{end_seconds:02d}:{end_milliseconds:03d},000\n")
+                f.write(f"{start_minutes:02d}:{start_seconds:02d}:{start_milliseconds:03d} --> ")
+                f.write(f"{end_minutes:02d}:{end_seconds:02d}:{end_milliseconds:03d}\n")
                 f.write(f"{line}\n\n")
     
     return srt_path
@@ -331,14 +331,14 @@ def generate_video():
             fd, out_path = tempfile.mkstemp(suffix=".mp4")
             os.close(fd)
             
-           # Check for RushFlow font
-font_path = os.path.join(os.getcwd(), "fonts", "RushFlow.ttf")
-if os.path.exists(font_path):
-    font_style = f"FontName=RushFlow,FontFile={font_path}"
-    app.logger.info("Using RushFlow font")
-else:
-    font_style = "FontName=Arial"
-    app.logger.warning("RushFlow.ttf not found, using Arial")
+            # Check for RushFlow font (use .otf now)
+            font_path = os.path.join(os.getcwd(), "fonts", "RushFlow.otf")
+            if os.path.exists(font_path):
+                font_style = f"FontName=RushFlow,FontFile={font_path}"
+                app.logger.info("Using RushFlow font")
+            else:
+                font_style = "FontName=Arial"
+                app.logger.warning("RushFlow.otf not found, using Arial")
  
             # Advanced subtitle styling for better readability
             subtitle_style = (
@@ -364,10 +364,10 @@ else:
                 "-pix_fmt", "yuv420p",
                 "-shortest",
                 "-preset", "medium",        # Good quality/speed balance
-                "-crf", "20",              # High quality
-                "-maxrate", "4M",          # Max bitrate
-                "-bufsize", "8M",          # Buffer size
-                "-movflags", "+faststart", # Web optimization
+                "-crf", "20",               # High quality
+                "-maxrate", "4M",           # Max bitrate
+                "-bufsize", "8M",           # Buffer size
+                "-movflags", "+faststart",  # Web optimization
                 out_path
             ]
             
@@ -436,3 +436,4 @@ if __name__ == "__main__":
     # Production settings for Render deployment
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+
