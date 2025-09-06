@@ -331,15 +331,15 @@ def generate_video():
             fd, out_path = tempfile.mkstemp(suffix=".mp4")
             os.close(fd)
             
-            # Check for RushFlow font
-            font_path = os.path.join(os.getcwd(), "fonts", "RushFlow.ttf")
-            if os.path.exists(font_path):
-                font_style = f"FontName=RushFlow,FontFile={font_path}"
-                app.logger.info("Using RushFlow font")
-            else:
-                font_style = "FontName=Arial"
-                app.logger.warning("RushFlow.ttf not found, using Arial")
-            
+           # Check for RushFlow font
+font_path = os.path.join(os.getcwd(), "fonts", "RushFlow.ttf")
+if os.path.exists(font_path):
+    font_style = f"FontName=RushFlow,FontFile={font_path}"
+    app.logger.info("Using RushFlow font")
+else:
+    font_style = "FontName=Arial"
+    app.logger.warning("RushFlow.ttf not found, using Arial")
+ 
             # Advanced subtitle styling for better readability
             subtitle_style = (
                 f"force_style='{font_style},"
