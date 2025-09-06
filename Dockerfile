@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first (for caching)
 COPY requirements.txt .
 
-# Install Python dependencies (force CPU-only torch + upgrade tools)
+# Install Python dependencies (upgrade pip/setuptools/wheel first)
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
     && pip install --no-cache-dir -r requirements.txt
 
