@@ -12,7 +12,6 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
-    ffprobe \
     curl \
     wget \
     git \
@@ -32,8 +31,8 @@ RUN mkdir -p fonts
 # Copy application files
 COPY server.py .
 
-# Copy font file (RushFlow.otf should be placed in fonts/ directory)
-COPY fonts/RushFlow.otf fonts/
+# Copy font file (RushFlow.ttf should be placed in fonts/ directory)
+COPY fonts/RushFlow.ttf fonts/
 
 # Create temp directory with proper permissions
 RUN mkdir -p /tmp && chmod 777 /tmp
