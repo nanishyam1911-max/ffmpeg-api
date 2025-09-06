@@ -19,4 +19,4 @@ venv/
 Thumbs.db
 
 # Keep font
-!fonts/RushFlow.ttf
+!fonts/RushFlow.otf
