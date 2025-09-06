@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+*.log
+.env
+.venv
+venv/
+*.mp3
+*.mp4
+*.wav
+*.png
+*.jpg
+*.jpeg
+*.avi
+*.mov
+.render/
+.DS_Store
+Thumbs.db
+
+# Keep font
+!fonts/RushFlow.ttf
