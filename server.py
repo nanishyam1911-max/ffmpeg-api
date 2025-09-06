@@ -23,6 +23,28 @@ def fetch_lyrics(lyrics_input):
         return resp.text
     return lyrics_input
 
+def make_srt(lyrics_text, out_path):
+    """Write lyrics into valid .srt file with dummy timings."""
+    lines = [l.strip() for l in lyrics_text.split("\n") if l.strip()]
+    with open(out_path, "w", encoding="utf-8") as f:
+        start_time = 0
+        index = 1
+        for line in lines:
+            # split long lines into 2 halves
+            if len(line) > 40:
+                line1 = line[:len(line)//2].strip()
+                line2 = line[len(line)//2:].strip()
+                text = line1 + "\n" + line2
+            else:
+                text = line
+
+            end_time = start_time + 3  # 3s per line (dummy timing)
+            f.write(f"{index}\n")
+            f.write(f"00:00:{start_time:02d},000 --> 00:00:{end_time:02d},000\n")
+            f.write(text + "\n\n")
+            start_time = end_time
+            index += 1
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"ok": True})
@@ -43,60 +65,41 @@ def generate_video():
         audio_path = download_temp(audio_url, ".mp3")
         img_path = download_temp(image_url, ".png")
 
-        # Fetch lyrics (raw text or from URL)
+        # Fetch lyrics
         lyrics_text = fetch_lyrics(lyrics_input)
 
-        # Prepare temporary SRT for FFmpeg
+        # Make SRT file
         fd, srt_path = tempfile.mkstemp(suffix=".srt")
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            for line in lyrics_text.split("\n"):
-                line = line.strip()
-                if not line:
-                    continue
-                # Gentle split for long lines
-                if len(line) > 40:
-                    mid = len(line) // 2
-                    f.write(line[:mid] + "\n" + line[mid:] + "\n\n")
-                else:
-                    f.write(line + "\n\n")
+        os.close(fd)
+        make_srt(lyrics_text, srt_path)
 
-        # Output temporary video
+        # Output temp video
         fd, out_path = tempfile.mkstemp(suffix=".mp4")
         os.close(fd)
 
-        # Absolute path for font
-        font_path = os.path.join(os.getcwd(), "RushFlow.ttf")
-
-        # FFmpeg command
+        # FFmpeg subtitles with RushFlow font
         cmd = [
             "ffmpeg", "-y",
             "-loop", "1", "-i", img_path,
             "-i", audio_path,
-            "-vf", f"subtitles={srt_path}:force_style='FontName=RushFlow,FontSize=36,PrimaryColour=&HFFFFFF&,FontFile={font_path}'",
+            "-vf", f"subtitles={srt_path}:force_style='FontName=Rush Flow,FontSize=36,PrimaryColour=&HFFFFFF&'",
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-shortest",
             out_path
         ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
-        # Send video
         return send_file(out_path, mimetype="video/mp4", as_attachment=True, download_name="final_video.mp4")
 
-    except requests.RequestException as e:
-        return jsonify({"error": f"Download failed: {str(e)}"}), 400
-    except subprocess.CalledProcessError as e:
-        return jsonify({"error": f"FFmpeg failed: {str(e)}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
-        # Cleanup temp files after sending
-        for p in [audio_path, img_path, srt_path, out_path]:
+        for p in [audio_path, img_path, srt_path]:
             if p and os.path.exists(p):
-                try:
-                    os.remove(p)
-                except:
-                    pass
+                try: os.remove(p)
+                except: pass
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+
