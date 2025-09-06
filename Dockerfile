@@ -32,8 +32,8 @@ RUN mkdir -p fonts
 # Copy application files
 COPY server.py .
 
-# Copy font file (RushFlow.ttf should be placed in fonts/ directory)
-COPY fonts/RushFlow.ttf fonts/ 
+# Copy font file (RushFlow.otf should be placed in fonts/ directory)
+COPY fonts/RushFlow.otf fonts/
 
 # Create temp directory with proper permissions
 RUN mkdir -p /tmp && chmod 777 /tmp
